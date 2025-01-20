@@ -39,40 +39,36 @@ export const childrenHelperMixin: Partial<Container> = {
         const range = end - beginIndex;
         const removed: ContainerChild[] = [];
 
-        if (range > 0 && range <= end)
+        if (range < 0 || beginIndex < 0 || end > this.children.length)
         {
-            for (let i = end - 1; i >= beginIndex; i--)
-            {
-                const child = this.children[i];
-
-                if (!child) continue;
-                removed.push(child);
-                child.parent = null;
-            }
-
-            removeItems(this.children, beginIndex, end);
-
-            const renderGroup = this.renderGroup || this.parentRenderGroup;
-
-            if (renderGroup)
-            {
-                renderGroup.removeChildren(removed);
-            }
-
-            for (let i = 0; i < removed.length; ++i)
-            {
-                this.emit('childRemoved', removed[i], this, i);
-                removed[i].emit('removed', this);
-            }
-
-            return removed;
-        }
-        else if (range === 0 && this.children.length === 0)
-        {
-            return removed;
+            throw new RangeError('removeChildren: numeric values are outside the acceptable range.');
         }
 
-        throw new RangeError('removeChildren: numeric values are outside the acceptable range.');
+        for (let i = end - 1; i >= beginIndex; i--)
+        {
+            const child = this.children[i];
+
+            if (!child) continue;
+            removed.push(child);
+            child.parent = null;
+        }
+
+        removeItems(this.children, beginIndex, end);
+
+        const renderGroup = this.renderGroup || this.parentRenderGroup;
+
+        if (renderGroup)
+        {
+            renderGroup.removeChildren(removed);
+        }
+
+        for (let i = 0; i < removed.length; ++i)
+        {
+            this.emit('childRemoved', removed[i], this, i);
+            removed[i].emit('removed', this);
+        }
+        
+        return removed;
     },
 
     /**
